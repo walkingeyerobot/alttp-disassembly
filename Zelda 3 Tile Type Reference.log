@@ -1,0 +1,24 @@
+This guide is made for keeping track of which tile types are animated and which are not.
+(these are for dungeons)
+
+Animated:
+
+
+$1BA \
+$1BB |--- Shallow Water Tiles. They are laid out in this fashion:
+$1BC |                 $1BB $1BA
+$1BD /                 $1BD $1BC
+
+$1C6 - Torch Flame
+$1C8 - brick wall to the side of wall torches (upper)
+$1CA - brick wall to the side of wall torches (lower) 
+
+; notes about DMA for animated tiles. One particular DMA transfer of interest is
+; at $B50 in the rom. 
+; 1 0x7EA680->0x2118 Bytes: 1024 (inc) V-Line:238 VRAM: 3B00 (1,0) word
+; The above should sum it up pretty well.
+; 
+
+Non Animated
+
+$1EC - black (transparent)

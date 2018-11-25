@@ -1,0 +1,640 @@
+Date: 12/01/2006
+Version 5. Minor revisions.
+
+Date: 11/23/2005
+Version 4. Nearly Totally correct and complete. It remains to be proven that certain areas are unused.
+
+/\/\/\/  ||\\\\ ||     |||\\      /\       ||||||||||||       /\
+    /|   ||     ||     //  \\    //\\        || || ||        //\\
+   /|    ||\\   ||     //   ||  //  \\       || || ||       ///\\\
+  /|     ||//   ||     //   || //||||\\      || || ||      /\    /\
+ /|      ||     ||     //  // //      \\     || || ||     //\\  //\\
+/\/\/\/  ||//// ||//// |||// //        \\  ||||||||||||  ///\\\///\\\
+
+  <^^>   <^^>         ****  ****         ****  ****         ****  ****      
+ <<<@@^^^^@@>>>     ***  ****  ***     ***  ****  ***     ***  ****  ***    
+<<@@@@@@@@@@@@>>   **            **   **            **   **            **   
+<<@@@@@@@@@@@@>>   **            **   **            **   **            **   
+ <<@@@@@@@@@@>>     **          **     **          **     **          **    
+  <<@@@@@@@@>>       **        **       **        **       **        **     
+   <<@@@@@@>>         **      **         **      **         **      **      
+     <<@@>>             **  **             **  **             **  **       
+      <<>>               ****               ****               ****         
+       <>                 **                 **                 **          
+
+MathOnNapkins' Zelda III SRAM (*.srm) hacking guide. .srm is the save file type used with Snes9x.
+
+This FAQ is based off of save slot 1. There is an offset of $500 bytes for each slot. Thus,
+First Game starts at $000, Second at $500, and the Third at $A00. Also note that
+each slot is "mirrored," a technique that makes two copies of your save data in the same file.
+
+Slot 1: $000; Mirror: $F00
+Slot 2: $500; Mirror: $1400
+Slot 3: $A00; Mirror: $1900
+
+It suffices to edit the main copy. Note each copy has its own checksum.
+
+-FOR ROM HACKERS-
+
+Note that since each save file and mirror is 0x500 bytes and the length of the .srm file is 0x2000 bytes,
+we have addresses $1E00-$1FFF free for our own fiendish purposes. But with that comes responsbility. Since the game engine only loads
+what it needs, you will have to make sure your memory is initialized to what you want it to. Don't assume it will be zero or some other value
+on startup of the machine. The three major emulators even differ on what they put there by default. (Sleuth, Zsnes, and Snes9x)
+
+Take into consideration if you want a permanent stat to be added in, you should probably index it in such a way that you have copies
+for all three save files. Note, the game for some odd reason uses address $701FFF on a temporary basis. Annoyed the hell out of me when
+a romhack I was doing conflicted with that location. I thought the game didn't use anything past $1DFF at that time. Just be aware of that
+one. You can use it probably, but don't save permanent data to it, like a game timer ;).
+
+If you are going to take advantage of this extra space remember to use long writes to bank $70,
+or intelligently manipulate the data bank register if you have to.
+
+-END ROM HACKER BLOCK-
+
+===============================================================================================
+
+Crash course in reading the FAQ
+
+Hexadecimal Numbers: Numbers written with the $ symbol before them denote hexadecimal numbers, or numbers in base 16. For example, $521 denotes 5*(16^2) + 2*(16^1) + 1*(16^0) = 1313 in decimal. Numbers without a $ can normally be assumed to be decimals.
+
+Hexadecimal numbers, sometimes called just hex numbers, were made to be nicer representations of
+binary numbers - numbers in base two. All numbers in binary are represented with ones and zeroes.
+
+Bit ordering in bytes: a "Byte" contains 8 bits, and they are numbered from right to left as follows-
+
+7 6 5 4 3 2 1 0
+
+For example, a byte with bits 2 and 6 set would look like 01000100 in binary.
+$77 is the hexadecimal way to represent this number.
+
+Each bit position corresponds to a value in base 2.
+
+      Decimal  Hex
+Bit | Value  | Value
+0   |   1    |   $1
+1   |   2    |   $2
+2   |   4    |   $4
+3   |   8    |   $8
+4   |  16    |  $10
+5   |  32    |  $20
+6   |  64    |  $40
+7   | 128    |  $80
+
+Some binary numbers are larger, such as 16,24,32,or even 64 bit numbers. In this case,
+bits of higher order correspond to greater powers of two. Ex: Bit 8 of a 16-bit number corresponds
+to 256. 16-bit numbers are often called "Words" as opposed to "Bytes".
+
+****CAUTION*****
+
+The Zelda sram relies upon an inverse checksum. That is, if you add to any byte in the .srm file,
+you must subtract from that save game's checksum to maintain the balance of things. Otherwise,
+when the game is started, Zelda.smc will detect that all the bytes in the file don't add up to the
+checksum, and your file will be deleted. If you know how to NOP (make ineffective) the subroutine that does this than
+you can work a lot easier. That is beyond the scope of this document and is a topic in 65816 assembly
+language, i.e. the code for the the SNES processor.
+
+****CAUTION*****
+
+Beginning of Address information. These offsets directly correspond to $7E:F--- when your particular save file is being played. When the game is finished it writes the information into bank $70 in the corresponding slot + offsets presented here. E.G. if you're playing the second save file, information from $7E:F000-$7E:F4FF will get saved from to $70:0500-$70:09FF, and mirrored to $70:1400-$70:18FF.
+
+Room information: There are 296 ( $128 in hex) rooms in Zelda3. Hyrule magic cannot expand the number of rooms, and I probably wouldn't want to expand them just because rearranging this map information in SRAM would painful, among other things.
+
+Each room has one word of information devoted to it, so that means addresses $0-$24F contain the information for our dungeon levels.
+
+$000 - $24F : Data for Rooms (two bytes per room)
+
+High Byte               Low Byte
+d d d d b k ck cr       c c c c q q q q      
+
+c - chest, big key chest, or big key lock. Any combination of them totalling to 6 is valid.
+q - quadrants visited: 
+k - key or item (such as a 300 rupee gift)
+d - door opened (either unlocked, bombed or other means)
+r - special rupee tiles, whether they've been obtained or not.
+b - boss battle won
+
+qqqq corresponds to 4321, so if quadrants 4 and 1 have been "seen" by Link, then qqqq will look like 1001. The quadrants are laid out like so in each room:
+
+--------------- 
+|      |      |
+|  4   |  3   |
+|      |      |
+|-------------|
+|      |      |
+|  2   |  1   |
+|      |      |
+---------------
+
+Breakdown of where the data comes from in work RAM: (we'll reprint the diagram)
+
+High Byte                   Low Byte
+d d d d b k ck cr       c c c c q q q q      
+| | | | | | |  |        | | | | | | | |
+| | | | | | |  |        | | | | \-+-+-+--- Derived from $7E0408
+| | | | | | |  |        | | | | 
+| | | | \-+-+--+--------+-+-+-+----------- Derived from ($7E0402 >> 4) in 16 bit mode 
+| | | |
+\-+-+-+----------------------------------- Derived from $7E0400
+
+See routine $13947 for more details.
+
+$250-$27F Nothing, but if we could expand the game's data a bit, we could easily use these for extra dungeon rooms. That would bring the grand total to 320 (decimal), which would be $140 in hex. 
+Notice that each room has two bytes, so that would extend up to $27F. 
+This makes sense given this area is completely unused. 
+Nintendo probably just didn't end up using the extra rooms and thus never put any data in them. But it appears they planned for extras if they needed them ;).
+I credit Euclid (the romhacker, not the mathematician) with encouraging me to accept this.
+
+$280-$2FF Overworld Event Information 
+
+    (one byte per area)
+
+    ?ho???s?
+
+        o - If set, the area will draw its designated overlay when you enter it. 
+            e.g. If you're triggered misery mire then the entrance shows up there the next time you enter that area.
+            You can view overlays in the latest release of Hyrule Magic (v0.963).
+            Other overlays include stairs leading underground, and the removal of the weathervane after it has exploded.
+        
+        s - If set, the area will draw its secondary overlay when you enter it.
+        
+        h - If set, heart piece has been collected in this area already.
+            Also used for a handful of other sprites.
+        
+        ? - unknown and probably unused.
+
+$300-$33F Nothing again, but it also has potential to be used for more overworld data. That would allow for $C0 (192 decimal) areas over all. 
+(meaning 64 in addition.) Note areas $80 and $82 are used but don't save data the way the other areas do. (i.e. not here)
+I believe they wanted more overworld areas, and planned to use this area.
+
+--- Item Information ---
+
+Bow:              $340. 0 - nothing. 1 - bow w/ no arrows. 2 - bow w/ arrows. 3 - silver arrows
+
+Boomerang:        $341. 0 - nothing. 1 - blue boomerang. 2 - red boomerang. 
+
+Hookshot:         $342. 0 - nothing. 1 - hookshot.
+
+Bombs:            $343. How many bombs you have. Can exceed 0x50, up to 0xff
+
+Mushroom:         $344: 0 - nothing. 1 - Mushroom. 2 - Magic Powder
+
+Fire Rod:         $345: 0 - nothing. 1 - Fire Rod.
+
+Ice Rod:          $346: 0 - nothing. 1 - Ice Rod.
+
+Bombos Medallion: $347: 0 - nothing. 1 - Bombos Medallion.
+
+Ether Medallion:  $348: 0 - nothing. 1 - Ether Medallion.
+
+Quake Medallion:  $349: 0 - nothing. 1 - Quake Medallion.
+
+Torch:            $34A. 0 - nothing. 1 - torch.
+
+Hammer:           $34B. 0 - nothing. 1 - magic hammer. 
+
+Flute:            $34C. 0 - nothing. 1 - shovel. 2 - flute, no bird. 3 - flue, bird activated.
+
+Bug Catching Net: $34D. 0 - nothing. 1 - bug catching net.
+
+Book of
+Mudora:           $34E. 0 - nothing. 1 - Book of Mudora
+
+Bottles:          $34F: 0 - nothing. 1 - has bottles.
+
+Cane of
+Somaria:          $350. 0 - nothing. 1 - cane of somaria.
+
+Cane of
+Byrna:            $351. 0 - nothing. 1 - cane of byrna.
+
+Magic
+Cape:             $352. 0 - nothing. 1 - magic cape.
+
+Magic
+Mirror:           $353. 0 - nothing. 1 - scroll looking thing that works like mirror. 
+                        2 - mirror with correct graphic.
+
+Gloves:           $354. 0 - normal strength. 1 - Power Gloves. 2 - Titan's Mitt
+
+Boots:            $355. 0 - nothing. 1 - boots. *Just having the boots isn't enough to dash.
+                        You must have the ability flag corresponding to run set as well.
+                        See $379.
+
+Flippers:         $356. 0 - nothing. 1 - flippers. Having this allows you to swim, but doesn't make
+                        the swim ability text show up by itself. See $379
+                        Unlike the boots, the ability is granted, as long as you have this item.
+
+Moon Pearl:       $357. 0 - nothing. 1 - moon pearl.
+
+????              $358. Unused? Beginning to think it really is unused. 
+                        Not even referenced in the rom by any means that I could see.
+
+Sword:            $359. 
+                        0-No sword
+                        1-Fighter Sword
+                        2-Master Sword
+                        3-Tempered Sword
+                        4-Golden Sword
+      
+                        ***See Side Note 2***
+
+Shield:           $35A.      
+                        0-No shield
+                        1-Blue Shield
+                        2-Hero's Shield
+                        3-Mirror Shield  
+                  
+                        ***See Side Note 2***
+
+Armor:            $35B. 
+                        0-Green Jerkin
+                        1-Blue Mail
+                        2-Red Mail
+                  
+                        ***See Side Note 2***
+
+Bottle:           $35C-F
+                        0-No bottle
+                        1-Mushroom (no use)
+                        2-Empty bottle
+                        3-Red Potion
+                        4-Green Potion
+                        5-Blue Potion
+                        6-Fairy
+                        7-Bee
+                        8-Good Bee
+      
+Rupees:           $360-1 (Goal)
+                  $362-3 (Actual).
+                  
+                  This number can be set above the 999 limit. 
+                  It is a word, so you can have lots of rupees. (Up to about 65000) 
+                  One word is capacity, The other is your current supply.
+
+THE COMPASS, BIG KEY, AND DUNGEON MAP WORD LOCATIONS ARE ALL MAPPED OUT THE SAME WAY, AS YOU WILL OBSERVE.
+
+Note: The unused areas would correspond to dungeon numbers $1C and $1E in the variable $7E040C, but alas there are no dungeons
+in the game with those values. 
+
+If you see "(doesn't exist)" it means this feature was not used in this dungeon in the original, in case you were wondering.
+
+Compass1:           $364.     bit 0: Unused
+                              bit 1: Unused
+                              bit 2: Compass of Ganon's Tower
+                              bit 3: Compass of Turtle Rock
+                              bit 4: Compass of Gargoyle's domain
+                              bit 5: Compass of Tower of Hera
+                              bit 6: Compass of Ice Palace
+                              bit 7: Compass of Skull Woods. 
+
+Compass2:           $365      bit 0: Compass of Misery Mire.
+                              bit 1: Compass of Dark Palace
+                              bit 2: Compass of Swamp Palace
+                              bit 3: Compass of Hyrule Castle 2 (doesn't exist)
+                              bit 4: Compass of Desert Palace
+                              bit 5: Compass of Eastern Palace
+                              bit 6: Compass of Hyrule Castle (doesn't exist)
+                              bit 7: Compass of Sewer Passage (doesn't exist)
+
+BigKey1:            $366.     bit 0: Unused
+                              bit 1: Unused
+                              bit 2: Big Key of Ganon's Tower
+                              bit 3: Big Key of Turtle Rock
+                              bit 4: Big Key of Gargoyle's domain
+                              bit 5: Big Key of Tower of Hera
+                              bit 6: Big Key of Ice Palace
+                              bit 7: Big Key of Skull Woods. 
+                        
+BigKey2:            $367.     bit 0: Big Key of Misery Mire.
+                              bit 1: Big Key of Dark Palace
+                              bit 2: Big Key of Swamp Palace
+                              bit 3: Big Key of Hyrule Castle 2 (doesn't exist)
+                              bit 4: Big Key of Desert Palace
+                              bit 5: Big Key of Eastern Palace
+                              bit 6: Big Key of Hyrule Castle
+                              bit 7: Big Key of Sewer Passage (doesn't exist)
+
+Dungeon map1:       $368.     bit 0: Unused
+                              bit 1: Unused
+                              bit 2: Map of Ganon's Tower
+                              bit 3: Map of Turtle Rock
+                              bit 4: Map of Gargoyle's domain
+                              bit 5: Map of Tower of Hera
+                              bit 6: Map of Ice Palace
+                              bit 7: Map of Skull Woods. 
+
+Dungeon map2:       $369      bit 0: Map of Misery Mire
+                              bit 1: Map of Dark Palace
+                              bit 2: Map of Swamp Palace
+                              bit 3: Map of Hyrule Castle 2 (doesn't exist)
+                              bit 4: Map of Desert Palace
+                              bit 5: Map of Eastern Palace
+                              bit 6: Map of Hyrule Castle
+                              bit 7: Map of Sewer Passage (doesn't exist)
+
+Wishing Pond Rupee  $36A. Number of rupees in the pond
+Count
+
+Heart pieces
+collected:          $36B. Number of heart pieces (out of four) you have earned
+
+Health:             $36C. Goal (capacity) Health. Each increment of $08 is worth one heart.
+                          $04 is a half heart. The max is generally $A0. 
+                          The game is coded to not accept health values beyond this.
+                  
+                    $36D. Actual Health. Same as above, but this reflects
+                          your current health status rather than potential.
+
+Magic Power:        $36E. Magic power ranges from 0 to $80 (128). Each small bottle refills $10. 
+                        Setting Magic above $80 causes the magic meter to glitch and you can't 
+                        use special items.
+
+Keys:               $36F. Number of Keys you have in the dungeon you are currently in. 
+                        You can earn keys on the overworld but they don't do anything. 
+                        If you're in a non-keyed dungeon it will generally read $FF.
+
+Bomb Upgrades:      $370. Number of upgrades your bomb capacity has received. Behavior varies after a 
+                          while. Will probably need recoding to be consistent.
+
+Arrow Upgrades:     $371. Number of upgrades your arrow capacity has received. 
+                          Same as above, more or less.
+
+Hearts filler:      $372. Write to this location to fill in a set number of hearts. 
+                          Make sure to write in a multiple of $08. 
+                          Otherwise, you will end up filling the whole life meter.
+
+Magic filler:       $373. Write to this location how much magic power you want filled up. The maximum 
+                         effective value is $80.
+
+Pendants:           $374. Bit 0: Courage
+                          Bit 1: Wisdom
+                          Bit 2: Power
+
+Bomb filler:        $375. Write to this location to add X bombs to your arsenal. It will not exceed your 
+                          maximum, as defined with $370
+
+Arrow filler:       $376. Write to this location to add X arrows to your arsenal. It will not exceed your 
+                        maximum, as defined with $371.
+
+Arrows:             $377. Can exceed 70.
+
+????                $378. ????
+
+Ability Flags:      $379. Bit 0: 
+                          Bit 1: Swim
+                          Bit 2: Run / Dash
+                          Bit 3: Pull
+                          Bit 4: ----
+                          Bit 5: Talk
+                          Bit 6: Read
+                          Bit 7: ----
+
+Crystals:           $37A. Bit 0: Misery Mire
+                          Bit 1: Dark Palace
+                          Bit 2: Ice Palace
+                          Bit 3: Turtle Rock
+                          Bit 4: Swamp Palace
+                          Bit 5: Gargoyle's Domain
+                          Bit 6: Skull Woods
+
+Magic usage         $37B. $0: normal consumption
+                          $1: 1/2 consumption
+                          $2: 1/4 consumption
+
+Keys earned per dungeon:
+                    $37C: Sewer Passage
+                    $37D: Hyrule Castle
+                    $37E: Eastern Palace
+                    $37F: Desert Palace
+                    $380: Hyrule Castle 2
+                    $381: Swamp Palace
+                    $382: Dark Palace
+                    $383: Misery Mire
+                    $384: Skull Woods
+                    $385: Ice Palace
+                    $386: Tower of Hera
+                    $387: Gargoyle's Domain
+                    $388: Turtle Rock
+                    $389: Ganon's Tower
+                    $38A: ??? possibly unused. (Were they planning two extra dungeons perhaps?)
+                    $38B: ??? possibly unused.
+
+--- Game Event Information ---
+
+Progress Indicator (value, not bitwise)
+$3C5: $0: Unset, Will put Link in his bed state at the beginning of the game. (Also can't use sword or shield)
+      $1: You have a sword and start in the castle on start up.
+      $2: Indicates you have completed the first Hyrule Castle dungeon.
+      $3: Indicates you have beaten Agahnim and are now searching for crystals.
+      $4 and above: meaningless. Though, you could write code using them to expand the event system perhaps.
+
+$3C6: Progress Flags (bitwise)
+
+    0 - Set after your Uncle gives you his gear in the secret passage.
+        Prevents him from showing up there again.
+    
+    1 - Indicates that you've touched the dying priest in Sanctuary.
+    
+    2 - Set after you bring Zelda to sanctuary?
+    
+    3 - Unused? (98% certainty)
+    
+    4 - Set after Link's Uncle leaves your house. It's used to prevent him from respawning there.
+    
+    5 - Set after you obtain the Book of Mudora (this is a guess)
+    
+    6 - Seems to be a persistent flag that toggles between two possible
+        statements that a fortune teller can give you during your "reading".
+        In other words, don't expect this to stay in one state if you're using
+        fortune tellers. Has no other known purpose.
+    
+    7 - Unused? (98% certainty)
+
+Map Icons Indicator 2 (value, not bitwise)
+$3C7:
+    
+    0x00 - ????
+    0x01 - ????
+    0x02 - ????
+    0x03 - The Three Pendants
+    0x04 - Master Sword in Lost Woods
+    0x05 - Agahnim (skull icon at Hyrule Castle)
+    0x06 - Just crystal 1 shown (Sahasrala's idea)
+    0x07 - All crystals shown
+    0x08 - Agahnim (skull icon at Ganon's Tower)
+
+    All values beyond 8 are invalid, it seems.
+
+Starting Entrance to use:
+$3C8: Abbreviations:
+
+    LH = Link's House;
+    SA = Sanctuary;
+    MC = Mountain Cave;
+    PP = Pyramid of Power in DW;  
+    
+    0: Start the game in Link's house always.
+    1: SA.
+    3: Secret passage under HC garden (near dying uncle).
+    5: LH or SA or MC.
+        
+
+Progress Indicator 3 (bitwise)
+$3C9: 0: If set, means the bum gave you his bottle already.
+      1: If set, means that the salesman in the village sold you a bottle already
+      2: 
+      3: Flute Boy (DW) has been arborated
+      4: Thief's Chest has been opened by the middle aged guy
+      5: After you save the Smithy's partner, this bit gets set.
+      6:
+      7: Means Smithies have your sword. Once they give it back it's no longer set. (so nonpermanent)
+
+Lightworld / Darkworld
+$3CA: 0:
+      1:
+      2:
+      3:
+      4:
+      5:
+      6: If set, we're in dark world. Other wise, in light world.
+      7:
+
+Unused?
+$3CB: ?????
+      
+$3CC[0x01] - (Tagalong) 
+    
+    Tagalong Indicator (who is following you, if anyone?) (value based)
+    
+    Note: Don't use a value of 0x0F or larger here, as it will likely crash
+    the game.
+    
+    0x00 - Tagalong disabled
+    0x01 - Princess Zelda
+    0x02 - ???
+    0x03 - ???
+    0x04 - Old Man?
+    0x05 - Zelda (invisible) bitching at you about coming to rescue her.
+    0x06 - Blind masquerading as a Maiden
+    0x07 - Missing Dwarf (smithyfrog as I call him) in DW
+    0x08 - Missing Dwarf in LW
+    0x09 - Middle Aged Guy w/ Sign
+    0x0A - Kiki the monkey
+    0x0B - ???
+    0x0C - Thief's chest
+    0x0D - Super Bomb
+    0x0E - Activated in reaction to acquiring the Master Sword. Used
+           to trigger a telepathic message from Zelda indicating that Agahnim's
+           goons have come for her at Sanctuary.
+
+$03CD[0x02] - 
+    
+    Cached Y coordinate of Tagalong after it has been lost by the player.
+    Applies to the old man and to the super bomb, at the very least.
+    This is intended to be used not as a save game variable, but rather as
+    a means of picking the Tagalong back up by getting in contact with it.
+
+
+$03CF[0x02] - 
+
+    Cached X coordinate of Tagalong after it has been lost by the player.
+    Applies to the old man and to the super bomb, at the very least.
+    This is intended to be used not as a save game variable, but rather as
+    a means of picking the Tagalong back up by getting in contact with it.
+
+$3D1: ????
+
+$3D2: 
+
+$3D3: Set to 0 normally. Set to $80 if a Super Bomb is going off.
+
+$3D4-$3D8: ????
+
+Player's Name
+$3D9-$3E4: See appendix for listing of character codes. Note each of the six letters is represented by a 16-bit number.
+
+Validity (Checksum) of the File:
+$3E5-$3E6:  There is a subroutine in the ROM that checks to make sure this value is 0x55AA. 
+            (Note the reverse byte order in the actual SRAM.) 
+            If you alter this your file is automatically tagged for deletion at startup. 
+            The game is designed to delete it, it's not a Super NES feature or anything. 
+            In short, Don't mess with it. Unused game slots have the value 0x0000 here,
+            and you will too if you mess with it - resulting in your save file(s) being wiped
+            out.
+
+$3E7-$402 (?) Deaths totals for each dungeon. Each number is 16 bit. Thanks to Euclid for helping verify this!
+      $3E7: Sewers
+      $3E9: Hyrule Castle
+      $3EB: Eastern Palace
+      $3ED: Desert Palace
+      $3EF: Hyrule Castle 2
+      $3F1: Swamp Palace
+      $3F3: Dark Palace
+      $3F5: Misery Mire
+      $3F7: Skull Woods
+      $3F9: Ice Palace
+      $3FB: Tower of Hera
+      $3FD: Gargoyle's Domain
+      $3FF: Turtle Rock
+      $401: Ganon's Tower
+
+Life/Save Counter: 
+$403-4. Counts the number of times your saved or died in the game, before you beat it.
+
+PostGame Death Counter: 
+$405-6. When you start the game this is written to with the value -1 (0xFFFF). On the game select
+screen, it will only display a number if this is not 0xFFFF. The max displayable number is 999.
+When you beat the game, the number of times you died gets recorded here.
+
+Presumed to be unused
+$407-$4FD: ????
+
+Inverse Checksum: $4FE-F. If you add numbers to the file, you need to subtract from this location. See Side Note 3 for more information.
+
+===============================================================================================
+
+Appendix:
+
+Side Note 2: Items other than the standard equipment can be equipped. For instance, it's possible
+to equip the compass as a sword. By some miracle, the items you end up with often work the same
+way as their appropriate counterparts. Sometimes they are far superior to the normal items, and
+sometimes they just suck. At least one item makes your armor invincible! Just experiment a little.
+Beware, the palletes will not be standard.
+
+Side Note 3: A tutorial on inverse checksums. Let's say I add to location $3EE. Now E = 14 in the
+decimal system. (Note we are looking at the last digit. "E" that is.) Therefore $3EE is even. 
+
+If I add a value to a memory location with an even address,
+I must subtract from the even address of the inverse checksum. Example: Suppose I add $4 to $305.
+$305 is odd, so I SUBTRACT $4 from the odd checksum byte: $4FF. If I subtracted from $305, I must
+add to $4FF. This maintains the "balance" of the file and keeps it from being erased.
+
+Now this will work for slight changes in the checksum, but it takes a bit of insight to recognize
+that the checksum is really a 16-bit number, not just two 8-bit numbers functioning separately.
+
+(edit later)
+----------------------------
+
+Character Codes:
+
+Alpha-numeric
+
+00-A 01-B 02-C 03-D 04-E 05-F 06=G 07-H 08-I^ 09-J 0A-K 0B-L 0C-M 0D-N OE-O OF-P 
+10-??
+20-Q 21-R 22-S 23-T 24-U 25-V 26-W 27-X 28-Y 29-Z 2A-a 2B-b-2C-c 2D-d 2E-e 2F-f
+40-g 41-h 42-k 43-j 44-i 45-l 46-m 47-n 48-o 49-p 4A-q 4B-r 4C-s 4D-t 4E-u 4F-v
+
+60-w 61-x 62-y 63-z 64-0 65-1 66-2 67-3 68-4 69-5 6A-6 6B-7 6C-8 6D-9 6E-"?" 6F-"!"
+80-"-" 81-"." 82-","   85-"(" 86-")" 
+
+Special characters (not normally accessible. This is by far an incomplete listing)
+
+A0-small right arrow A1-"'" (apostrophe) A2-HPiece again A3-"empty right hand heart cont."
+A4-see A7 A5-Same as A7 A6-"Quarter Heart piece, top right corner."
+A7-"Heart piece,left half" A8-"Heart piece, right half" A9-blank AA-"left arrow" 
+SNES Button Alphabet: AB-A AC-B AD-X AE-Y
+AF-I
+B1-blank^
+
+^This code is not the canon encoding of this character. ex. AF is the proper "I". 08 is not.
+

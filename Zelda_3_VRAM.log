@@ -1,0 +1,98 @@
+Zelda 3 VRAM Documentation by MathOnNapkins
+
+V0.2
+
+Last Updated 12/17/2006
+
+================================================================================
+
+
+
+================================================================================
+
+Module 7 (Dungeon) and Module 9 (Overworld)
+
+byte: [$0000 - $1fff]
+word: [$0000 - $0fff]
+    
+    BG2 Tilemap
+
+================================================================================
+
+byte: [$2000 - $3fff]
+word: [$1000 - $1fff]
+    
+    BG1 Tilemap
+
+================================================================================
+
+byte: [$4000 - $7fff]
+word: [$2000 - $3fff]
+    
+    4bpp Tiles for BG0 and BG1 [They share :) ]. Sometimes known as BG CHR.
+
+================================================================================
+
+byte: [$8000 - $bfff]
+word: [$4000 - $5fff]
+    
+    Sprite Graphics Memory
+    
+    Sprite graphics can be seen as divided in half. Areas that have 0's as
+    sprite indexes will not overwrite the graphics from the previous screen.
+    This can cause inconsistent behavior though, so be careful.
+    
+    byte: [$8000 - $87ff]
+    word: [$4000 - $43ff]
+        
+        Reserved Sprite Memory (Slot 0)
+        
+        This region contains Link's body's current sprites, as well as various
+        other essential sprites that can't easily be taken out of memory.
+        e.g. rupees, the sword and shield, etc.
+        
+    byte: [$8800 - $9fff]
+    word: [$4400 - $4fff]
+        
+        Locale Specific Graphics (Slots 1 - 3)
+        
+        "Locale" in this sense can be one of three things: Dark World, Light World, or 
+        inside a Dungeon. This will determine what the pots and bushes you pick up look like,
+        (rocks as well) 
+    
+    byte: [$a000 - $bfff]
+    word: [$5000 - $5fff]
+        
+        Room / Area Specific Graphics (Slots 4 - 7)
+        
+        Every overworld area and dungeon room has a graphics number that tells the game
+        which sprite graphics to load dynamically.
+
+================================================================================
+
+byte: [$c000 - $dfff]
+word: [$6000 - $6fff]
+
+    BG3 Tilemap
+    
+    This is the Heads up Display and Menu, etc.
+
+================================================================================
+
+byte: [$e000 - $ffff]
+word: [$7000 - $7fff]
+    
+    2bpp Tiles for BG3
+    
+    byte: [$f800 - $ffff]
+    word: [$7c00 - $7fff]
+        
+        VWF rendered tiles go here. This is generated-at-runtime CHR that is
+        in and of itself the current three lines of text that you can see in a
+        message.
+        
+    - note that graphics packs 6A, 69, and 68 are used with srctypeone for this
+
+**************************************************************************
+
+

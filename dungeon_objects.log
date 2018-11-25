@@ -1,0 +1,319 @@
+star tile class objects
+
+1.2.1F active star tile
+
+    - $0432 as tracking variable
+    - $06A0, X as tile address
+
+staircase class objects
+
+1.2.2D in-floor up north staircase
+
+    - $0438 as tracking variable
+    - $06B0, X as tile address
+
+1.3.1E
+
+    - $04A2 as tracking variable
+    - $06B0, X as tile address
+
+1.3.20
+
+    - $04A2 as tracking variable
+    - $06B0, X as tile address
+    
+1.3.21
+
+    - $04A8 as tracking variable (shared with 1.3.29)
+    - $06B0, X as tile address
+    
+1.3.26 straight up north staircase
+
+    - $04A2 as tracking variable
+    - $06B0, X as tile address
+
+1.3.27 straight down north staircase
+
+    - 
+    - $06B0, X as tile address
+    
+1.3.28 straight up south staircase
+
+    - $04A2 as tracking variable
+    - $06B0, X as tile address
+
+1.3.29 straight down south staircase
+
+    - $04A8 as tracking variable (shared with 1.3.21)
+    - $06B0, X as tile address
+
+1.2.38
+
+    - $047E as tracking variable
+    - $06B0, X as tile address
+    
+1.2.39
+
+    - $0480 as tracking variable
+    - $06B0, X as tile address
+    
+1.2.3A
+
+    - $0482 as tracking variable
+    - $06B0, X as tile address
+
+1.2.3B
+
+    - $0484 as tracking variable
+    - $06B0, X as tile address
+    
+theory: There is an order in which staircase objects must be stored in order to work 100% correctly.
+
+reasoning:  depending on which staircase object is invoked, the starting position for a variable number
+            of additional staircase type objects gets updated. See diagram:
+           
+            $0438 - updated by 1 routine
+            
+            $047E - updated by 2 routines
+            $0482 - updated by 3 routines
+            $04A2 - updated by 5 routines
+            $04A4 - updated by 7 routines
+
+            $043A - updated by 9 routines
+            
+            $0480 - updated by 10 routines
+            $0484 - updated by 11 routines
+            $04A6 - updated by 13 routines
+            $04A8 - updated by 15 routines
+            
+            As we can see, $04A8 would correspond to objects that must come last in the stream, and
+            $0438 corresponds to objects that must come first in the stream
+           
+// ==============================================================================================
+
+ladder class objects
+
+1.2.30 ????? staircase (unused in original game)
+
+    - $043C as tracking variable
+    - $06B8, X as tile address
+    
+1.2.31 inter-bg north staircase
+
+    - $043E as tracking variable
+    - $06B8, X as tile address
+    
+1.2.32 inter-pseudo-bg staircase
+
+    - $0440 as tracking variable
+    - $06B8, X as tile address
+
+1.2.33 inter-bg north staircase (water room)
+    
+    - $0442 as tracking variable
+    - $06B8, X as tile address
+    
+1.2.35 water ladder
+
+    - $0444 as tracking variable
+    - $06B8, X as tile address
+
+1.2.36 inactive water ladder
+
+    - $0446 as tracking variable
+    - $06B8, X as tile address
+
+1.3.1B in-room up-south staircase
+
+    - $049A as tracking variable
+    - $06B8, X as tile address
+
+1.3.1C in-room up-north staircase
+
+    - $049C as tracking variable
+    - $06EC, X as tile address
+
+1.3.1D in-room up-south staircase
+
+    - $049E as tracking variable
+    - $06EC, X as tile address
+
+in-room staircases and ladders class objects
+    
+    $043C - updated by 1 routine
+    $043E - updated by 1 routine
+    $0440 - updated by 1 routine
+    $0442 - updated by 1 routine
+    $0444 - updated by 2 routines
+    $0446 - updated by 3 routines
+    $049A - updated by 1 routine
+    
+// ==============================================================================================
+
+2.vertical.0 standard door?
+
+    - No remarkable properties known at this time.
+
+2.any.1 inset version of 2.any.0
+
+    - Sets priority bits of tilemap entries in a 7 x 4 region leading from the bottom of the door
+      to the edge of the screen.
+    
+    - Since this door type insets tile priority, doesn't that mean it can only be used in the positions
+      farther from the edge of the room? (Otherwise causing memory writing problems...?
+
+2.down.2 cave exit door (inset)
+
+    - why is this different from 2.down.8?
+    
+2.any.3 unused
+
+    - perhaps this is a debug property / feature. should be investigated
+    - it gets a fair amount of attention in the code for each door direction
+    
+2.up.4 waterfall door
+    
+    - probably hides itself via priority bits in tilemap?
+
+2.down.5 large palace exit door (BG2)
+    
+    - door is completely on BG2
+    - only manifests as anything special in down direction
+
+2.down.6 large palace exit door (BG1)
+
+    - door is completely on BG1
+    - only manifests as anything special in down direction
+
+2.down.7 cave exit door
+
+    - no comment
+
+2.down.8 cave exit door (inset)
+    
+    - no comment
+
+2.vertical.9 exit door
+
+    - Triggers a transition to the overworld
+      How that transition occurs depends on whether the room number is <= 255. If greater than that,
+      Link simply comes out at the location he came in, regardless of what door he exits from.
+
+2.any.10 palace toggle property
+
+    - Use it to modify other doors to give them this property
+      
+2.any.11 floor toggle door
+
+    - Use it to modify other doors to give them this property
+
+2.any.12 double sided trap door
+
+    - apparently must be triggered by something to open
+
+2.up.13 invisible door?
+
+    - only used in Turtle Rock
+    - door is completely on BG1
+
+2.any.14 locked door that opens into normal door
+
+    - versatile, locked on both sides (naturally)
+
+2.up.15 big key door that opens into normal door
+
+2.up.16 locked door that obscures staircase type
+2.up.17 locked door that obscures staircase type
+
+    - door is completely on BG1
+
+2.any.18 unused
+
+    - might do something, but not seen in original game
+
+2.up.19 locked door that produces staircase?
+
+    - seems like it doesn't draw the top of the door (to help interface with staircases.)
+    - only used once in the game.
+    - door is completely on BG2
+
+2.up.20 bomable vermin door
+2.left.20 bombable vermin door
+
+    - opens when bombed but makes small vermin enemies come out (somehow)
+
+2.down.21 bombable exit door
+
+    - notable in that it turns into exit door when bombed open
+
+2.any.22 unused
+
+    - might do something, but not seen in original game
+
+2.up.23 bombable wall
+
+    - seems to work in a variety of positions
+
+2.up.24 blow-up-able wall
+
+    - rarely used
+    - door starts off as a wall but a trigger blasts it open
+
+2.up.25 hidden door that opens with sword slash
+    
+    - rarely used
+    - door is completely on BG1
+
+2.any.26 unused
+
+    - might do something, but not seen in original game
+
+2.any.27 BG1 only right side trap door
+2.any.28 BG1 only left side trap door
+
+    - can have two-part form
+    - door is completely on BG1
+
+2.any.29 unused
+2.any.30 unused
+2.any.31 unused
+
+    - might do something, but not seen in original game
+
+2.any.32 top on BG1 door
+
+    - can have two-part form
+    - top of door is on BG1, rest is on BG2
+
+2.any.33 unused
+
+    - might do something, but not seen in actual game
+
+2.left.34
+2.up.34 trap door triggered by event?
+    
+    - can have two-part form
+    - seen in positions 9, 10, and 11
+    - opened by sprite logic perhaps?
+
+2.horizontal.35 arbitrary room link door?
+
+    - designed to specially link to other rooms via dungeon header? (guess)
+    - seen in positions 3 and 9
+    - top of door is on BG2, rest is on BG1
+
+2.left.36 one side trap door
+    
+    - two-part door
+    - only seen in position 11
+    - top of right-facing door is on BG2, rest is on BG2
+
+2.left.37 one sided trap door
+    
+    - two-part door
+    - trap door on left, normal (or somewhat normal on right?)
+    - only seen in position 11
+    - top of right-facing door is on BG2, rest is on BG1
+
+    - Trap on left, normal on right 
+

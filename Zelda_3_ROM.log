@@ -1,0 +1,1626 @@
+!!! These addresses are understood to be from a
+!!! ROM with no 0x200 byte header at the beginning
+!!! Please take this into consideration
+
+Continuguous Mappings:
+
+$0 - $1395 : size = 1395h
+
+
+$14813 - $1787E : size = 281Eh
+
+***********************************
+
+-----------------------------------
+
+BANK 00
+
+-----------------------------------
+
+$0 - $489 Code
+
+***********************************
+
+$48A - $493
+
+size = Ah
+
+1 word each.
+
+offsets for reading from SRAM. Based on an index stored at $70:1FFE, it will load the value
+$0000, $0500, $0A00, or (possibly) $0F00. The last value seems sketchy b/c that is an offset for the mirror of the first save slot.
+
+***********************************
+
+DMA offsets for bank $7E (usage undetermined as of yet. Probably pointers to font tiles)
+
+$494 - $5FB 
+
+size = 168h
+
+1 word each.
+
+$494 - $49B: Used in DMA transfers as local addresses in bank $7E. See $0AD8 in ZeldaFlow.rtf
+$49C - $4AB: Used in DMA transfers as local addresses in bank $7E. See $0AC0 and $0AC2 in ZeldaFlow.rtf
+$4AC - $4B1: Used in DMA transfers as local addresses in bank $7E. See $0AC4 and $0AC6 in ZeldaFlow.rtf
+$4B2 - $5B1: Used in DMA transfers as local addresses in bank $7E. See $0AC8 in ZeldaFlow.rtf
+$5B2 - $5D1: Used in DMA transfers as local addresses in bank $7E. See $0ACA in ZeldaFlow.rtf
+$5D2 - $5DD: Stored to $7EC013. The value stored is indexed by $7EC015.
+$5DE - $5FB: Used in DMA transfers as local addresses in bank $7E. See $0AE0 and $0AE2 in ZeldaFlow.rtf
+
+***********************************
+
+$5FC - $E4B Code
+
+***********************************
+
+$E4C - $E53
+
+size = 9h
+
+????
+
+***********************************
+
+$E54 - $110E Code
+
+***********************************
+
+$110F - $113E
+
+size = 30h
+
+????
+
+***********************************
+
+$137B - $1395
+
+size = 1Ch
+
+????
+
+***********************************
+
+$1396 - $15F3
+
+size = 25Eh
+
+1 word each.
+
+Pointers to ROM Addresses used in DMA transfers. While these are local addresses,
+The DMA transfers generally use Bank $10. See $0ACC and $0ACE in ZeldaFlow.rtf
+
+***********************************
+
+$15F4 - $1851
+
+size = 25Eh
+
+1 word each.
+
+Pointers to ROM Addresses used in DMA transfers. While these are local addresses,
+The DMA transfers generally use Bank $10. See $0AD0 and $0AD2 in ZeldaFlow.rtf
+
+!**********************************
+
+$1852 - $1887
+
+size = 36h
+
+1 word each.
+
+Pointers to ROM Addresses used in DMA transfers. While these are local addresses,
+The DMA transfers generally use Bank $10. See $0AD4 and $0AD6 in ZeldaFlow.rtf
+
+!**********************************
+
+$1888 - $18AA
+
+size = 23h
+
+1 byte each.
+
+Upper byte of a series of VRAM Target addresses, that are used depending on the situation.
+Table is indexed by $7E0116
+
+!**********************************
+
+$18AB-$18BF NULL
+
+***********************************
+
+$18C0 - $18DF
+
+
+***********************************
+
+$1B52 - $
+
+***********************************
+
+$4FF3-$528F - indexed (long) table to compressed graphics packets
+
+size = 29Dh
+
+Each of these packets is treated differently:
+
+
+
+$0A - Dungeon sprite
+
+
+
+***********************************
+
+$5B57 - $????
+
+?????
+
+***********************************
+
+$6073 - graphics data? Appears to come in 8 byte chunks.
+
+***********************************
+
+$7C9C - 
+
+***********************************
+
+-----------------------------------
+
+BANK 01
+
+-----------------------------------
+
+***********************************
+
+$C6FC - Falling Item Data
+
+size = Dh
+
+Use the entrance number of the dungeon, divided by two to obtain an index into this array.
+The possible values are 00 - nothing, 01 - pendant of courage, 02 - pendant of widsom,
+03 - pendant of power, or 06 - crystal. 1 byte per dungeon value. See data in $48D90 as it is
+related to this table.
+
+***********************************
+
+$DB69 - $DDE8 Dungeon Secrets Data
+
+size = 280h
+
+This is a pointer table that uses references local addresses assumed to be in bank $01.
+Since there are 320 rooms in the game there are naturally 320 different pointer entries
+here. In the game's original state, however, the rooms past room 295 just contain null data.
+
+Secrets Contents:
+
+Data comes in 3 byte chunks and is terminated by an instance of $FFFF
+
+First two bytes: A word that denotes the VRAM address that the item is found at.
+This identifies the item as belonging to that part of the screen.
+
+Third byte: identifies the type of item that is hiding there. e.g. $08 is a key
+
+***********************************
+
+$E96E - $EB65 Array of chest information in 3 byte chunks. 168 entries in all (0xA8)
+
+    First word - Room number it is located in. MSB determines whether it is a big chest or not. (big chest if set)
+    Last byte - index of the type of item contained in the chest.
+
+    Note: For rooms with two keys, 5 is the chest limit, technically. You will have conflicts in what you can grab.
+    Normal rooms will have a limit of 6 chests, though it might be possible to create a workaround.
+
+    I'm probably going to move this array out to extended areas so we can have more chests.
+
+***********************************
+
+-----------------------------------
+
+BANK 02
+
+-----------------------------------
+
+
+
+***********************************
+
+$12475-$1252C - Code
+
+***********************************
+
+	$1252D-$1253B
+
+***********************************
+
+$1253C-$125EB - Code
+
+***********************************
+
+$125EC-$129C3
+
+	$125EC-$1262B - (0x40 entries, 1 byte each) 	- actual OW location to use for conglomerated OW areas
+	$1262C-$12633 - (0x04 entries, 2 bytes each) 	- adjustment for $84
+	$12634-$12833 - (0x100 entries, 2 bytes each) 	- 
+	$12834-$1283B - (0x04 entries, 2 bytes each)
+	$1283C-$12843 - (0x04 entries, 2 bytes each)
+	$12844-$12883 - (0x40 entries, 1 byte each) - Size of overworld areas (0x00 = 512x512 pixel map, 0x20 = 1024x1024 pixel map) All other values are not considered.
+	$12884-$128C3 - (0x40 entries, 1 byte each) - ???? Gets written to $0717, whatever that does.
+
+	Note that the following two arrays overlap in the middle (by a range of 0x80 entries)
+
+	$12884-$128C3 - (0x80 entries, 1 byte each) - Y / X?
+	$128C4-$129C3 - (0x80 entries, 1 byte each) - Y / X? fill in later
+	
+***********************************
+
+$129C4-$12CD9 - Code
+
+!***********************************
+
+$12CDA-$12D49
+
+	size = 70h
+
+	1 word each
+
+	Tile Type listings for use in drawing dungeons
+
+***********************************
+
+$12D4A-$135AB Code
+
+***********************************
+
+$135AC-$135DB - (0x30 entries, 1 byte each) unknown data indexed by $7E00A8
+
+***********************************
+
+$135DC-$139CB - Code
+
+***********************************
+
+$139CC-$139DB - unknown data
+
+***********************************
+
+$139DC-$13B87 - Code
+
+***********************************
+
+$13B88-$13B8F - Bitmasks for the routine below it
+
+***********************************
+
+$13B90-$13DBF - Code
+
+***********************************
+
+$13DC0-$13DC7 - Data used for setting $0614-$061B
+
+***********************************
+
+
+
+***********************************
+
+Normal Entrances: 0h - 84h
+Pointers to rooms for each entrance. So entrance number one points to the first word value in this array.
+
+$14813 - $1491C (word values) 
+
+size = 10Ah
+	
+Recall, room numbers are 16 bits, typically ranging from 0-295. Expansion will hopefully bump that up to 320 total rooms (0-319)
+
+!**********************************
+
+Scroll Edges - unsure about what these do exactly
+
+$1491D-$14D44
+
+size = 428h
+
+Each entry is 8 bytes long.
+
+Format: 1 byte each. Corresponds to hyrule magic values in the "More" aka Entrance Properties dialog box.
+
+HU, FU, HD, FD, HL, FL, HR, FR
+
+!**********************************
+
+Normal Entrance Y Scroll 
+
+$14D45 - $14E4E
+
+size = 10Ah
+
+2 bytes each
+
+!**********************************
+
+Normal entrance X Scroll
+
+$14E4F - $14F58
+
+size = 10Ah
+
+2 bytes each
+
+!**********************************
+
+Normal entrance Y Coordinates
+
+; This is where Link starts off at in the dungeon when he enters
+
+$14F59 - $15062
+
+size = 10Ah
+
+2 bytes each
+
+!**********************************
+
+Normal entrance X Coordinates
+
+$15063 - $1516C
+
+size = 10Ah
+
+2 bytes each
+
+!**********************************
+
+Normal entrance X Camera Coordinates
+
+$1516D - $15276
+
+Lower bounds for scrolling (upper bounds = this plus 2)
+
+size = 10Ah
+
+2 bytes each
+
+!**********************************
+
+Normal entrance Y Camera Coordinates
+
+$15277 - $15380
+
+Lower bounds for scrolling (upper bounds = this plus 2)
+
+size = 10Ah
+
+2 bytes each
+
+!**********************************
+
+Normal entrance Blocksets
+
+$15381 - $15405
+
+size = 85h
+
+1 byte each
+
+!**********************************
+
+Normal entrance Floor values
+
+This tells us what kind of properties the floor has.
+If 1, then it has floors that you can fall through to the next level
+If 0, I think it means it can be fallen down to
+If -1, has no pits
+If -2, ????
+
+$15406 - $1548A
+
+size = 85h
+
+1 Byte each
+
+!**********************************
+
+Normal entrance Dungeon Values
+
+Dungeons actually in the game are numbered like so 0, 2, 4, ..., 18, 1A
+1C and 1E are unused (and hence could potentially be added.) Notice they are all even numbers.
+In asm routines these values are divided by two sometimes to provide an index into other arrays.
+That's why. The definition of a "dungeon" is something with a key, compass, and map.
+
+$1548B - $1550F
+
+size = 85h
+
+1 Byte each
+
+FF = -1 denotes it doesn't belong to a dungeon.
+
+!**********************************
+
+Normal Entrance Doorway Type Data
+
+This is used only when you exit the given room. For example, let's say you enter through a skull doorway in Skullwoods.
+But that's not really a door way, it's just a set of tiles that are no different from a hole you might create after picking
+up a big rock. But if you entered from a building door, the game has to know whether to put the door frame when you exit.
+
+$15510 - $15594
+
+1 Byte each
+
+size = 85h
+
+0 = no doorway when exiting
+1 = draws a door frame upon exiting
+2 = ???? HM says vertical doorframe. But in the original game, no doorway is vertical. It appears the designers may have intended doorways where you enter from the left or right... fits in well with my idea to implement that.
+
+And technically, I believe it should be the other way around. 1 should be vertical and 2 should be horizontal.
+
+!**********************************
+
+Normal Entrance Ladder and BG Settings
+
+$15595 - $15619
+
+size = 85h
+
+1 byte each, with the following 2 bit layout
+
+xxxaxxxb
+
+x - unimportant
+a - if set, then Link enters on the lower level (BG2)
+b - if set... not sure what happens exactly. Check the game engine to be sure.
+
+!**********************************
+
+Normal Entrance Horizontal and Vertical Scroll Properties
+
+$1561A - $1569E
+
+size = 85h
+
+For these, I guess if the flags in the appropriate places are set, then the room will be able to scroll in those directions.
+
+1 byte each, with the following layout:
+
+xxaxxxbx
+
+a - Horizontal flag
+b - Vertical flag
+
+!**********************************
+
+$1569F - $15723
+
+size = 85h
+
+Normal Entrance Scroll Quandrant
+
+1 byte each
+
+has four different expected values
+0h, 2h, 10h, 12h
+
+Whether the HM interpretation of this is correct, I need to check.
+
+!**********************************
+
+$15724 - $1582D
+
+size = 10Ah
+
+Normal Entrance EXIT Door location 
+
+1 word each. Denotes, um X and Y coordinates for overworld?
+
+!**********************************
+
+$1582E - $158B2
+
+size = 85h
+
+Normal Entrance Dungeon Music
+
+1 byte each
+
+FF - same
+
+See ZeldaFlow for more information on values under $012C
+
+!**********************************
+
+$158B3-$15B6D Code
+
+!**********************************
+
+$15B6E - $15B7B 
+
+size = Eh
+
+Starting Location Entrances: 85h - 8Bh. Note there are 7 Starting locations all in all.
+
+1 word each
+
+Pointers to rooms for each starting location entrance.
+
+!**********************************
+
+$15B7C - $15BB3
+
+size = 38h
+
+Starting Location Scroll Ranges (still not sure how they work totally)
+
+Each entry is 8 bytes long.
+
+Format: 1 byte each. Corresponds to hyrule magic values in the "More" aka Entrance Properties dialog box.
+
+HU, FU, HD, FD, HL, FL, HR, FR
+
+!**********************************
+
+$15BB4 - $15BC1
+
+size = Eh
+
+Starting Location X Scroll Data
+
+1 word each
+
+!**********************************
+
+$15BC2 - $15BCF
+
+size = Eh
+
+Starting Location Y Scroll Data
+
+1 word each
+
+!**********************************
+
+$15BD0 - $15BDD
+
+size = Eh
+
+Starting Location Link X Coordinate
+
+1 word each
+
+!**********************************
+
+$15BDE - $15BEB
+
+size = Eh
+
+Starting Location Link Y Coordinate
+
+1 word each
+
+!**********************************
+
+$15BEC - $15BF9
+
+size = Eh
+
+Starting Location Camera Y Coordinate
+
+1 word each
+
+!**********************************
+
+$15BFA - $15C07
+
+size = Eh
+
+Starting Location Camera X Coordinate
+
+1 word each
+
+!**********************************
+
+$15C08 - $15C0E
+
+size = 7h
+
+Starting Location Blockset Type
+
+1 byte each
+
+see Normal Entrance description
+
+!**********************************
+
+$15C0F - $15C15
+
+size = 7h
+
+Starting Location Floor Type
+
+1 byte each
+
+see Normal Entrance description
+
+!**********************************
+
+$15C16 - $15C1C
+
+size = 7h
+
+Starting Location Dungeon Designation
+
+1 byte each
+
+see Normal Entrance description
+
+!**********************************
+
+$15C1D - $15C23
+
+size = 7h
+
+Starting Location Ladder and BG Settings
+
+1 byte each, with the following 2 bit layout
+
+xxxaxxxb
+
+x - unimportant
+a - if set, then Link enters on the lower level (BG2)
+b - if set... not sure what happens exactly. Check the game engine to be sure.
+
+!**********************************
+
+$15C24 - $15C2A
+
+size = 85h
+
+Starting Location Horizontal and Vertical Scroll Properties
+
+For these, I guess if the flags in the appropriate places are set, then the room will be able to scroll in those directions.
+
+1 byte each, with the following layout:
+
+xxaxxxbx
+
+a - Horizontal flag
+b - Vertical flag
+
+!**********************************
+
+$15C2B - $15C31
+
+Starting Location Doorway Type Data
+
+This is used only when you exit the given room. For example, let's say you enter through a skull doorway in Skullwoods.
+But that's not really a door way, it's just a set of tiles that are no different from a hole you might create after picking
+up a big rock. But if you entered from a building door, the game has to know whether to put the door frame when you exit.
+
+1 Byte each
+
+0 = no doorway when exiting
+1 = draws a door frame upon exiting
+2 = ???? HM says vertical doorframe. But in the original game, no doorway is vertical. It appears the designers may have intended doorways where you enter from the left or right... fits in well with my idea to implement that.
+
+And technically, I believe it should be the other way around. 1 should be vertical and 2 should be horizontal.
+
+!**********************************
+
+$15C32 - $15C3F
+
+Starting Location Overworld Exit Location
+
+1 word each. Denotes, um X and Y coordinates for overworld?
+
+!**********************************
+
+$15C40 - $15C4D
+
+Starting Location Entrance Values
+
+1 word each. Since the starting locations have to reference an entrance, this is necessary.
+
+!**********************************
+
+$15C4E - $15C54
+
+Starting Location Music Values
+
+1 byte each. See ZeldaFlow.rtf for more info.
+
+!**********************************
+
+$15C55 - $15D89 Code
+
+!**********************************
+
+$15D8A-$164A2 - Exit Data (Note that some of these are fake "rooms" used in the ending sequence.)
+
+	This is not the complete listing of exit data that HM gives access to in its dialog. See _____
+
+	$15D8A-$15E27 - (0x4F entries, 2 bytes each) - Rooms that exit to overworld Areas ("Room" in HM)
+	$15E28-$15E76 - (0x4F entries, 1 byte each)  - Overworld area that the exit leads to. ("Map" in HM)
+	$15E77-$15F14 - (0x4F entries, 2 bytes each) - VRAM locations to place Link at. Gets fed to $7E0084 (???? in HM)
+	$15F15-$15FB2 - (0x4F entries, 2 bytes each) - Y Scroll Data
+	$15FB3-$16050 - (0x4F entries, 2 bytes each) - X Scroll Data 
+	$16051-$160EE - (0x4F entries, 2 bytes each) - Link's Y Coordinate
+	$160EF-$1618C - (0x4F entries, 2 bytes each) - Link's X Coordinate
+	$1618D-$1622A - (0x4F entries, 2 bytes each) - Camera Y Coordinate
+	$1622B-$162C8 - (0x4F entries, 2 bytes each) - Camera X Coordinate
+	$162C9-$16317 - (0x4F entries, 1 byte each)  - I assume these are sequencing variables to tell the camera where to go? Writes to $0624 and $0625 (Ukn1 in HM)
+	$16318-$16366 - (0x4F entries, 1 byte each)  - I assume these are sequencing variables to tell the camera where to go? Writes to $0628 and $0629 (Ukn2 in HM)
+
+	$16367-$16404 - (0x4F entries, 2 bytes each) - Door type setting 1. Writes to $0696 (See Zelda_RAM.log for in-depth description)
+								     0x0000: no change
+								     bmmmmmmm mmmmmmmm: (bit pattern)
+										b - if set, it's a bombable exit, otherwise it's a wooden exit.
+										m - (15-bit number) map16 address of the exit
+
+	$16405-$164A2 - (0x4F entries, 2 bytes each) - Door type setting 2. Write to $0698.
+								     0x0000: no change
+								     smmmmmmm mmmmmmmm: (bit pattern) 
+										s - if set, it's a palace exit, otherwise it's a sanctuary exit.
+										m - (15-bit number) map16 address of the exit
+
+!**********************************
+
+$164A3 - $166E0 Code
+
+!**********************************
+
+$166E1 - $167E0
+
+Size = 100h
+
+thingamajig with scroll ranges but for ending sequence too tired right now to do.
+
+0x20 bytes per section. 1 byte per entry in each section.
+
+The sections are interlaced and are written like so:
+
+Section -> Address
+$166E1, Y ->  $0600
+$16701, Y ->  $0602
+$16721, Y ->  $0604
+$16741, Y ->  $0606
+$16761, Y ->  $0610
+$167A1, Y ->  $0612
+$16781, Y ->  $0614
+$167C1, Y ->  $0616
+
+!**********************************
+
+$167E1 - $16800?
+
+??????
+
+1 word each
+
+Gets written to $0708
+
+!**********************************
+
+$16801-$16850 Exit Data (the ones that warp between overworld areas)
+	$16801-$16810 - Direction Link is facing when entering
+	$16811-$16820 - Sprite graphics index for the new area.	
+	$16821-$16830 - Graphics index for the new area
+	$16831-$16840 - 
+
+!**********************************
+
+$16851 - $16AE4 Code
+	
+
+!**********************************
+
+$16AE5 - $16C38
+
+Size = 154h
+
+Ending Sequence (again?)
+Each entry in all arrays is 1 word long.
+
+$16AE5 - $16B06
+
+Ending Sequence Overworld Areas to load.
+
+$16B07 - $16B28
+
+Ending Sequence VRAM locations for link.
+
+$16B29 - $16B4A
+
+Ending Sequence Y Scroll Data
+
+$16B4B - $16B6C
+
+Ending Sequence X Scroll Data
+
+$16B6D - $16B8E
+
+Ending Sequence Link Y Coordinate
+
+$16B8F - $16BB0
+
+Ending Sequence Link X Coordinate
+
+$16BB1 - $16BD2
+
+Ending Sequence Camera Y Coordinate
+
+$16BD3 - $16BF4
+
+Ending Sequence Camera X Coordinate
+
+$16BF5 - $16C16
+
+Ending Sequence ?????
+
+Gets stored to $0624
+
+$16C17 - $16C38
+
+Ending Sequence ?????
+
+Gets stored to $0628
+
+!**********************************
+
+$16C39 - $16CF7 Code
+
+!**********************************
+
+$16CF8 - $16D07
+
+Size = 10h
+
+Overworld Whirlpool Locations
+
+1 word each
+
+!**********************************
+
+$16D08 - $16DC4 Code
+
+!**********************************
+
+$16DC5 - $16EC4
+
+	Overworld Bombable Wall Locations
+
+	1 word each for each overworld area
+
+	I guess array contains info on which part of the tile map to look to draw the "opened" door overlay and all that.
+	So, once you bomb a wall, the 2nd bit of the $7EF280, X array is set, and it will remember to use this array to draw
+	that overlay.
+
+!**********************************
+
+$16EC5 - $1700C Code
+
+!**********************************
+
+$1700D - $17030 Jump Tables
+
+!**********************************
+
+$17031 - $171FB Code
+
+!**********************************
+
+$171FC - $1720D Jump Table
+
+!**********************************
+
+$1720E - $17252 Code
+
+!**********************************
+
+$17253 - $17272 Jump Table
+
+!**********************************
+
+$17273 - $1787E Code
+
+***********************************
+
+$1787F - $17884
+
+***********************************
+
+$17885 - $17888
+
+size = 4h
+
+Tile Position Offset, probably used in decompression routine.
+
+1 word each, 2 entries.
+
+!**********************************
+
+$17889 - $1788C
+
+#$0000. Used for decompression and graphics routines. Don't ask.
+#$0020. same
+
+!**********************************
+
+$1788D - $1794C
+
+Size = C0h
+
+Flags for loading tiles or graphics. Not sure on the exact usage.
+
+1 byte each.
+
+Although there are only about 82h areas in the overworld, the rest of this array is zeroes so I can't make heads or tails of it. So we're going to assume they planned more outdoor areas. for now (C0h)
+
+***********************************
+
+$1794D - $17D0C
+
+    Size = 3C0h
+
+    Overworld Map Data  
+
+    $1794D-$17B2C - Compressed Map32 Data (the high bytes of each word of map32 data)
+    $17B2D-$17D0C - Compressed Map32 Data (the low bytes of each word of map32 data)
+
+    referenced at locations 0x1759E and 0x175C9 in the rom by means of a LDA $......, X
+
+!**********************************
+
+$17D0D - $17F6D Code
+
+***********************************
+
+$18000-$1B3FF - Map32 to Map16 conversion values (upper left corners) 
+$1B400-$1E7FF - Map32 to Map16 conversion values (upper right corners)
+
+    See $20000 as well.
+
+!***********************************
+
+$1E800-$1EB04? - Compressed data that will be written to $7F6000.
+
+***********************************
+
+$20000-$233FF - Map32 to map16 conversion values (lower left corners)
+$23400-$267EF - Map32 to Map16 conversion values (lower right corners)
+
+    See $18000 as well.
+
+***********************************
+
+$26CC0-$26F2E - Pointers to dungeon overlays + data (e.g. pits that appear)
+
+    $26CC0-$26CF8 - The 3 byte pointers to the data (see below)
+                    
+                    There are 0x13 distinct pointers, and thus 0x13 distinct
+                    overlays.
+    
+    $26CF9-$26F2E - The actual dungeon overlay data all resides here, right
+                    after the pointers themselves.
+                    
+                    This data can only change a dungeon's layout as follows:
+                    It will either place a 4x4 tile square of floor tiles, or
+                    a 4x4 pit tile (the ones with the jagged edged appearance,
+                    specifically.)
+
+***********************************
+
+$26F2F-$271CC - Pointers to dungeon layouts + data
+
+***********************************
+
+$271CD-$271DD - extra 3-byte object data that seems in some form another to relate to the watergate
+                potentially related to other phenomena
+
+***********************************
+
+$271DE-$27369 - push block data
+
+    4 bytes per entry
+    
+    1st word: Room that the block exists in.
+    2nd word: Position of the block (expressed as tilemap coordinate)
+
+***********************************
+
+$2736A-$27489 - (inter room) torch data
+    
+    Consists of variable length segments consisting of:
+    
+    1st word: Room that the torches belong in
+    
+    After this is a series of words, each one being a tilemap address for a torch.
+    
+    This list of torches is terminated by the word value 0xFFFF
+
+***********************************
+
+$2748A-$27501 - initial equipment and misc. values for save game files
+
+    When a new save game file is created, this 0x3A byte array gets copied
+    to data starting at the offset ($700340 + (0x500 * save file slot number)
+    
+    It actually contains two different initial equipment setups. The first 0x3C bytes
+    are used with a cheat code of sorts meant to help play test the game by the programmers, beta testers, etc.
+    It gives you nearly all equipment and puts you at a place in the game just after saving Zelda.
+    
+    The second 0x3C bytes is used for the usual expected initial equipment setup that players
+    all experience.
+    
+    Routine $65A4D uses this data array.
+
+***********************************
+
+$27502-$27FEF - Array of pointers to header information. Each header is 14 bytes long.
+    
+    $27502-$27781 - 2 byte pointers to headers, 1 per room
+
+        There are pointers for 320 rooms
+
+    $27781-$27FEF - Actual header data
+
+        Header contents:
+        
+        byte 0: aaab bbcd
+        the a bits are transformed into 0000 0aaa and stored to $0414 ("BG2" in Hyrule Magic)
+        the b bits are transformed into 0000 0bbb and stored to $046C ("Collision" in Hyrule Magic)
+        the c bit is unused
+        the d bit is stored to $7EC005 (If set, use a lights out routine in the room transition)
+        
+        byte 1: aabb bbbb
+        the a bits are unused
+        the b bits are transformed into bbbb bb00, thus making them a multiple of 4.
+        This value is used to load 4 different palettes for the dungeon, and corresponds to,
+        you guessed it, Palette # in Hyrule Magic!
+        
+        The resulting index is used to load values for $0AB6, $0AAC, $0AAD, and $0AAE 
+        
+        byte 2: gets stored to $0AA2 (GFX # in Hyrule Magic)
+        
+        byte 3: value + #$40 gets stored to $0AA3 (Sprite GFX # in Hyrule Magic)
+        
+        byte 4: gets stored to $00AD ("Effect" in Hyrule Magic)
+        
+        byte 5: gets stored to $00AE ("Tag1" in Hyrule Magic)
+        
+        byte 6: gets stored to $00AF ("Tag2" in Hyrule Magic)
+        
+        ; These are the planes to use for bytes 9 through D. This determines which 
+        ; BG you appear on, and possibly more.
+        
+        byte 7: aabb ccdd
+        the a bits are transformed into 0000 00aa and stored to $063F 
+        the b bits are transformed into 0000 00bb and stored to $063E
+        the c bits are transformed into 0000 00cc and stored to $063D
+        the d bits are transformed into 0000 00dd and stored to $063C
+        
+        ; Note, the only safe values for a plane seem to be 0,1, or 2. Hyrule Magic
+        appears to violate this rule by letting you put 3 down, but nothing higher.
+        
+        byte 8: aaaa aabb
+        the a bits are unused
+        the b bits are transformed into 0000 00bb and stored to $0640
+        
+        byte 9: stored to $7EC000 These are all room numbers that you could possibly exit to.
+        byte A: stored to $7EC001
+        byte B: stored to $7EC002
+        byte C: stored to $7EC003
+        byte D: stored to $7EC004
+
+***********************************
+
+Euclid says:
+actually here's complete list of spells, i haven't manage to find out what the others are for yet.
+3B287 - fire/ice rod
+3B28A - 3 spells
+3B28D - magic powder
+3B290 - 
+3B293 - Red Staff (block making one)
+3B296 - 
+3B299 - torch
+3B29C - 
+3B29F - Blue Staff (start using)
+Euclid™ says:
+they're 3 bytes each, first one for normal, second one for 1/ 2 magic third for 1/4 magic
+
+***********************************
+
+$41543-$4154D - Bomb timers for each explosion state
+
+	1 byte each. There are 0x0C different bomb states
+
+***********************************
+
+$484E8-$4857F - Memory locations to write to when a chest is opened.
+                e.g. When you get a tempered sword, the game has to know to write to $7EF359.
+                So sword chests are mapped in such a way to write to that location.
+
+                There are $4C => 76 entries in this array, but obviously some are repeated locations b/c there is more than one type of boomerang, more than one type of sword, etc...
+
+$48580-$????? - Byte values to write to the locations described in $484E8, X above. e.g. a chest containing the golden sword would point to a value of 4 somewhere in this array. 
+
+***********************************
+
+$48B90-$48B96 - Table of Item Values to give. When items fall they use a number from 0-6 as a base index.
+
+size = 7h
+
+That value is used as an index into this table, which has the following values in the original rom:
+
+0 -> $10 - Ether Medallion
+1 -> $37 - Pendant of Courage
+2 -> $39 - Pendant of Power
+3 -> $38 - Pendant of Courage
+4 -> $26 - LiarHeart (according to HM). 
+5 -> $0F - Bombos Medallion
+6 -> $20 - Crystal
+
+***********************************
+
+Weathervane stuff
+
+Note: A word about overworld coordinates. The coordinate for 0,0 is at the top left corner 
+OF THE WHOLE OVERWORLD (this applies to areas 0 through 0x7F, not the others). Just because you are looking at something in hyrule magic, doesn't mean
+that top left corner of that map section is (0,0). For example, look at the bird's coordinates below.
+Looking at it in Hyrule Magic, you'd assume that they are roughly the same, but area #$18 happens to be on the left edge
+of the map, whereas it is about 2-3 whole screens down in terms of Y position. Hence the bird's 
+Y coordinate is about 4 times the size of it's X coordinate.
+
+$48CD5-$48D10 - Initial position data for the weathervane piece sprites (12 of them)
+   
+   $48CD5 ???
+   $48CE1 ???
+   $48CED - 12 bytes. Lower Y coordinate for all 12 pieces
+   $48CF9 - 12 bytes. Lower X coordinate for all 12 pieces
+   $48D05 ???
+
+   $48D65 - 1 byte. Upper Y coordinate byte for all 12 pieces. Normally #$07
+   $48D72 - 1 byte. Upper X coordinate byte for all 12 pieces. Normally #$02
+
+Caution: edits to these must be exact and careful, because they are embedded in code. Or rather,
+they are actually part of the code itself.
+
+   $48DC2 16bit Y coordinate for the bird to initialize to. Normally #$0788
+   $48DC7 16bit X coordinate for the bird to initialize to. Normally #$0200
+
+   $3A425 - 1 byte. Overworld area to use with the weathervane. Normally this reads #$18. Make sure to use hex.
+   $3A42C - 2 bytes. Overworld Y coordinate lower boundary for triggering the weather vane. Normally reads #$0760
+   $3A431 - 2 bytes. Overworld Y coordinate upper boundary " ... Normally reads #$07E0
+   $3A438 - 2 bytes. "         X "          lower "        " ... Normally reads #$01CF
+   $3A43D - 2 bytes. "         X "          upper boundary " ... Normally reads #$0230
+
+^So basically that defines a square that is $60 by $80 pixels, that serves as a trigger location,
+given the right conditions. Edit these to your heart's content.
+
+
+***********************************
+
+$4C635-$4C6F4 - Overworld widths of areas?
+
+size = 0xC0 bytes, one per Overworld area
+
+    values of either 0x04 or 0x02
+
+***********************************
+
+"Beginning" corresponds to values of $7EF3C5 of 0 or 1.
+"First Part" corresponds to a value of $7EF3C5 at 2.
+"Second Part" corresponds to values of $7EF3C5 at 3.
+
+$4C881-$4C900 - Array of pointers to OVERWORLD sprite and overlord information, for "Beginning" mode.
+
+	It has information for ONLY areas $0-$3F. (Notice that means light world, and hence why Dark World enemies use light world enemies
+	if you warp there during the beginning. They're reading the wrong data. In fact, it's Light world "First Part" data that it 
+	is inadvertently reading.
+	
+	The sprite / overlord information comes in 3 byte clusters. The game reads until it spots a $FF byte. (The $FF after the last cluster)
+	Since the overworld utilizes a sprite map, there can be many more than 16 sprites in memory in one overworld area. They are killed off
+	and created as they come into view.
+
+	First Byte: Y coordinate, which will be converted into pixel units later.
+
+	Second Byte: X coordinate, which will be converted into pixel units later.
+
+	Third Byte: Sprite or Overlord type. If a sprite, this will get loaded into a slot at $0E20, X. If an Overlord, will get loaded to $0B00, X.
+		
+	This operates a bit differently from Dungeon overlords and sprites. Any value greater than or equal to $F3 will be
+	considered an Overlord. $F3 is then chopped off of that value and used as the Overlord index.
+
+$4C901-$4CA20 - Array of pointers to Overworld sprite and overlord information, for "First Part" mode.
+
+	Basically the same as the array above, but for a later point in the game.
+
+$4CA21-$4CB40 - Array of pointers to Overworld sprite and overlord information, for "Second Part" mode.
+
+	Basically the same as the array above, but for a later point in the game.
+
+***********************************
+
+$4D62E-$4D92E - Array of pointers to DUNGEON sprite and overlord information. Pointers are local, and each room has a listing of sprites. They are in order of rooms.
+    
+    size = 300h
+    
+    Each entry is 2 bytes long.
+    
+    NOTE: Interesting to note that this pointer list seems to have space for $180 rooms, whereas the built in limit is $128. 
+    That's the first I've seen of an allocated array in the rom being larger than necessary. O_o.
+    
+    Layout of these listings:
+    First Byte: Stored to $0FB3. Not sure what the purpose of that is yet.
+    
+    After the first byte, you will see 3 byte clusters that break down thus:
+    
+    First Byte: 7  6  5  4  3  2  1  0
+                |  |  |  |  |  |  |  |
+                |  |  |  \--+--+--+--+-- Y coordinate (in pixels from the top, starting at 0) of the sprite divided by 16.
+                |  |  |
+                |  \--+-------------- If these are set, they will be used to generate a subtype, stored to $0E30, X.
+                |  
+                \--+--+----------- If set, the sprite is on BG2, if not it's on BG1
+    
+    Second Byte: 7  6  5  4  3  2  1  0
+                 |  |  |  |  |  |  |  |
+                 |  |  |  \--+--+--+--+-- X coordinate (in pixels from the far left, starting at 0) of the sprite divided by 16.
+                 |  |  |
+                 \--+--+----------- If all these bits are set then this is an Overlord, otherwise it's a normal sprite.
+                                    If only some of them are set they can be used to generate a subtype, stored at $0E30, X
+    
+    Third Byte: Sprite or Overlord type. If a sprite, this will get loaded into a slot at $0E20, X. If an Overlord, will get loaded to $0B00, X.
+    
+    The array is terminated with a byte of $FF.
+    
+************************************
+
+Sprite Statistics. All of the following arrays are $F3 bytes long (as expected, since there are $F3 different sprite types).
+
+$6B080, X - ??? Gets stored to $0E40, X.
+$6B173, X - Initial HP for all sprites. Gets stored to $0E50, X
+$6B266, X - Amount of damage the sprite can cause to Link.
+$6B359, X - Possibly a main palette index. Stored to $0E60, X
+$6B4CC, X - 
+$6B8F1[0x???] 
+
+************************************
+
+$70000-$70FFF - BG3 VWF graphics (uncompressed)
+
+	View this area in a tile editor and you'll see the text characters for the VWF.
+
+************************************
+
+$74703-$747C6 - Pointers for dictionary entries. (Start point and upper bound)
+
+************************************
+
+$75460 - location of palette indices (grouped in 4's)
+	These get mapped to $0AB6, $0AAC, $0AAD, and $0AAE respectively.
+
+************************************
+
+$78000 - Map16 to Map8 conversions (comes in groups of 8 bytes, 4 Map8 tiles each)
+
+************************************
+
+$7902A - ??? Gets mapped to $7EFF40 to $7EFFBF
+
+
+************************************
+
+$80000-$86FFF - 4bpp graphics sets for all of Link's animations
+
+************************************
+
+$87000-$8B7FF - 3bpp graphics sets (uncompressed)
+
+************************************
+
+3bpp?
+$C0D64 - location of compressed graphics for action sprites, (shields and shovel)
+
+2bpp
+$C2F0D - location of compressed graphics for the menu screen,
+and overlaps with graphics for the dungeon map screen. (includes text for items, and the map icon)
+
+2bpp
+$C3520 - location of compressed graphics for the menu screen (bug catching net, medallions, etc)
+
+2bpp
+$C3953 - location of compressed graphics for the menu screen (magic mirror, book of mudora, etc)
+
+************************************
+
+$DB800-$DB85F - Hole Data
+
+	$DB800-$DB825 - (0x13 entries, 2 bytes each) modified (less 0x400) map16 coordinates for each hole
+	$DB826-$DB84B - (0x13 entries, 2 bytes each) corresponding area numbers for each hole
+	$DB84C-$DB85F - (0x13 entries, 1 byte each)  corresponding entrance numbers
+
+!************************************
+
+$DB860-$DB8BE Code
+
+!************************************
+
+$DB8BF-$DBBF3 Overworld accessible entrances (other entrances are accessible via other methods, like game startup)
+
+	$DB8BF (0x2C entries, 2 bytes each) - valid map8 (CHR) values for entrances (left side)
+	$DB917 (0x2C entries, 2 bytes each) - valid map8 (CHR) values for entrances (right side)
+	$DB96F (0x81 entries, 2 bytes each) - area numbers for each entrance
+	$DBA71 (0x81 entries, 2 bytes each) - map16 coordinates for each entrance
+	$DBB73 (0x81 entries, 1 byte each)  - entrance numbers (ranging from 0x00 to 0x84)
+
+!************************************
+
+$DBBF4-$DBF4B Code
+
+************************************
+
+$DBF4C-$DBF63 Data (unknown type)
+
+************************************
+
+$DBF64-$DC2F8 Code
+
+!************************************
+
+$DC2F9-$DC8A3 - Overworld Secrets (Item) Data
+
+    $DC2F9-$DC3F8 - Local pointer table (2 bytes, 0x80 entries) to the data for each Area
+    $DC3F9-$DC89B - The actual data, each entry being 3 bytes. 
+                The first two bytes are the map16 coordinate for the secret. 
+                The last byte is the value of the secret. Valid values are 0x00 to 0x16, and 0x80, 0x82, 0x84, 0x86, 0x88
+    $DC89C-$DC8A3 (4 entries, 2 bytes each) - replacement map16 values. E.g. a hole secret would have a hole map16 as the replacement
+
+    Note: Areas 0x80 and above don't have items.
+
+************************************
+
+$DC8A4-$?????
+
+***********************************
+
+$E0000-$E7F29 - Text / Dialogue Data
+
+	(see also $76E20 for a bit more text data in this same format)
+
+	Some quick notes: the text box is 0x15 tiles (horiz.) by 0x06 tiles (vert.)
+	Each tile consists of 0x10 bytes, as they are 2bpp. 
+
+	Characters:
+
+		$0  to $19: 'A' through 'Z'
+		$1A to $33: 'a' through 'z'
+		$34 to $3D: '0' through '9'
+		$3E:		'!'
+		$3F:		'?'
+		$40:		'-'
+		$41:		'.'
+		$42:		','
+		$43:		'...'
+		$44:		|> (arrow pointing right)
+		$45:		'('
+		$46:		')'
+		$47:		Ahnk 		(used in Hylian script)
+		$48:		three waves (used in Hylian script) 
+		$49:		snake?	(used in Hylian script)
+		$4A:		picture of Link's head in the kidnapper signs (left half)
+		$4B:		picture of Link's head in the kidnapper signs (right half)
+		$4C:		'"' (left orientation)
+		$4D:		small arrow pointing up
+		$4E:		small arrow pointing down
+		$4F:		small arrow poitning left
+		$50:		small arrow pointing right
+		$51:		''' (apostrophe)
+		$52:		heart piece upper left filled (just left side)
+		$53:		heart piece empty 		(just right side)
+		$54:		heart piece left filled		(just left side)
+		$55:		heart piece 3/4 filled		(just left side)
+		$56:		heart piece upper right filled (just right side)
+		$57:		heart piece all filled 		(just left side)
+		$58:		heart piece all filled 		(just right side)
+		$59:		space (as in &nbsp;)
+		$5A:		<| (arrow pointing left)
+		$5B:		'A' in bold. (indicates the A button)
+		$5C:		'B' in bold. (indicates the B button)
+		$5D:		'X' in bold. (indicates the X button)
+		$5E:		'Y' in bold. (indicates the Y button) 
+		$5F:		alternate "l" or "I"? (apparently not used)
+		$60:		alternate "!" (apparently not used)
+		$61:		upside down "!" (apparently not used)
+		$62 to $65: apparently tab characters or space characters? (apparently not used)
+		$66:		strange red and white '.' (apparently not used)
+
+	Commands:
+
+		$67 [NextPic] command
+		$68 [Choose] command
+		$69 [Item] command (for waterfall of wishing)
+		$6A [Name] command (insert's player's name)
+		$6B [Window XX] command (takes next byte as argument)
+		$6C [Number XX] command (takes next byte as argument)
+		$6D [Position XX] command (takes next byte as argument)
+		$6E [ScrollSpd XX] command (takes next byte as argument)
+		$6F [SelChng] command
+		$70 [Crash] command (obviously that's probably not what it's intended to do but that's what HM lists it as)
+		$71 [Choose2] command
+		$72 [Choose3] command
+		$73 [Scroll] command
+		$74 [1] command (aka [Line1])
+		$75 [2] command (aka [Line2])
+		$76 [3] command (aka [Line3])
+		$77 [Color XX] command (takes next byte as argument)
+		$78 [Wait  XX] command (takes next byte as argument)
+		$79 [Sound XX] command (takes next byte as argument)
+		$7A [Speed XX] command (takes next byte as argument)
+
+
+		(this will be the Black Magic syntax for the following 		three codes. simple eh? Do NOT use these. Ever)
+		$7B [Command 7B] 
+		$7C [Command 7C] 
+		$7D [Command 7D] 
+
+		$7E [WaitKey] command
+		$7F stop command (ends the whole message)
+
+		$80 signals to switch to the second set of text data (much smaller)
+
+		$81 - $87 unused (don't use these!)
+		$88 - ??? Dictionary encoding bytes. Represents longer strings
+
+************************************
+
+$F4EBC - Message IDs for Maidens
+
+-- fill in later.
+
+************************************
+
+$F8000 - Location of type, layout, and object information for each Dungeon room.
+It's a table of 24 bit pointers with an entry for each room. (all 320 of them ;) )
+
+size = 3C0h
+
+140h entries each 3 bytes in length. Each long snes cpu address in the table points to a
+structure with the following layout:
+
+byte layout:
+
+byte0: aaaa bbbb. The a bits are transformed to aaaa0000 and select the type of 
+			empty space to fill in. Hyrule Magic calls this 'Floor 1'
+			Gets stored to $7E0490
+
+			The b bits are transformed to bbbb0000 and are the what Hyrule Magic calls
+			'Floor 2'
+			Gets stored to $7E046A
+
+byte1: aaab bbcd  The a bits are unused and should not be used
+			The b bits determine the room's layout type, ranging from 0 to 7.
+			The c and d bits are unknown, but I have a feeling it's related to $AA and $A9
+
+After that the bytes come in 3 or 2 byte object structures, used by routine $01:88E4.
+Objects are loaded until an object with value 0xFFFF occurs.
+If a value 0xFFF0 is loaded, the game will start loading Type 2 objects
+And will not go back to loading Type 1 objects until it is time to load
+the next layer. (Layer as in HM, not to be confused with the SNES' Backgrounds.
+A value of 0xFFFF will also terminate the loading of Type 2 objects.
+The routine immediately terminates if that happens during the loading of either object type.
+
+Type 1 Object structure: (3 bytes)
+
+Third Byte: Routine to use. If this byte is >= 0xF8 and < 0xFC, then it is a subtype 3 
+			object. If the index is >= FC, it is a subtype 2 object. If not, it is a subtype 1 
+			object.
+		
+			Subtype 1 Objects ------------------------------------------------------
+
+			First and Second Byte:	High Byte	Low  Byte
+                                    yyyy yycc	xxxx xxaa
+
+			The a bits are stored to $B2
+			The c bits are stored to $B4
+			The x and y bits are transformed into:  000y yyyy yxxx xxx0
+			This is a tilemap address that indexes into $7E2000 and / or $7E4000
+
+			Use the third byte * 2 as an index into the table at $8200
+			This is the routine that is used to draw and otherwise handle the object.
+			Subtype 1 objects have a maximum width and height of 4. width and height
+			are measured in terms of 32 x 32 pixels. (<-- last part is questionable)
+
+			Subtype 2 Objects ------------------------------------------------------
+
+			Subtype 2 objects are those with an index >= 0xFC
+
+			1st, 2nd, & 3rd bytes:  Third Byte Second Byte  Byte
+                                    ffdd dddd  eeee cccc   aaaa aabb
+			
+			The a bits are unused, but after all they are the marker for this type of object
+            subtype.
+            
+			The b, c, e, and f bits are transformed into a VRAM tilemap address:
+			
+			000c cccf fbbe eee0
+            
+            Might I add this is one messed up format?
+
+			The d bits are used as an index into the table at $8470. Since such indicies
+			are going to be even, the d bits are transformed into: 0000 0000 0ddd ddd0
+
+			Subtype 3 Objects ------------------------------------------------------
+
+			Similar to Subtype 1, with a few small exceptions.
+
+			The vram address is calculated the same way. However, $B2 and $B4 are not used
+			as length or width dimensions here. The routine that is used is determined as 
+			follows:
+
+			Take the original index (times two) that a Subtype 1 would have used. AND that
+			with 0x000E. Then shift left 3 times to produce 0000 0000 0eee 0000. Then,
+			OR in $B2 and $B4 and shift left once, so the final result is:
+			0000 0000 eeea abb0.
+
+			Also, this value indexes into $85F0 instead of $8200.
+			
+Type 2 Object Structure: (2 bytes)
+
+			High Byte	Low Byte
+
+			cccc cccc 	bbbb ddaa
+
+			The a bits form a 2-bit value (0000 0aa0) that determines the routine to use
+			for the object. In Hyrule Magic, corresponds to the "direction" of the door.
+			
+			The b bits are transformed into 000b bbb0 and stored to $02 -> X.
+			Corresponds to "Pos" of door objects in the Hyrule Magic. Note that these range from
+			0x00 to 0x16 (always even) which if you halve those values is 0 - 11 in decimal. This is
+			easily verifiable in Hyrule Magic.
+
+			The c bits are shifted into the lower byte and stored to $04 -> A and $0A. This
+			is later used to grab the tiles used to draw the door and the area below it.
+			In Hyrule Magic, corresponds to "type". Note the type is 1/2 of the number listed here.
+			This is because to avoid using an ASL A command, the c bits are always even.
+			
+			The d bits are unused.
+
+			Next I'll go into the nitty gritty of the various types (the value of $04). Again note that
+			we'll only be dealing with even values b/c that's what you'll see in the code. To convert
+			between here [as well as the code] and Hyrule Magic, take the hex value here and divide by two.
+			Convert to decimal and that's your Hyrule Magic "type."
+
+	Types:	0x00 - Basic door. Index = $0460
+			0x02 - Normal door?
+			0x04 - ???
+			0x06 - ???
+			0x08 - Waterfall door (only used in Swamp palace; in one room at that!)
+			0x0A - ???
+			0x0C - Trap door (probably other types but this seems to be most common)
+
+			0x12 - Adds a property to some doors allowing you to exit to the overworld
+				 (this is accomplished by writing to the tile attribute map)
+			0x14 - Transition to dark room?
+			0x16 - Toggles the target BG Link will emerge on. e.g. if Link starts on BG0 in the next
+				 room he'll be on BG1.
+
+			0x20 - Locked door specifically for BG0.
+			0x22 - "
+			0x24 - Locked door for either BG0 or BG1
+			0x26 - "
+			0x30 - Large exploded pathway resulting from a switch being pulled (unusual to have as a door as it's huge)
+			0x32 - Sword activated door (e.g. Agahnim's room with the curtain door you have to slash)
+			0x46 - warp door?
+
+************************************
+
+$F83C0 - Loaded when the header is loaded for each dungeon room. These appear to be the direct offset to where
+	the door objects appear. The normal objects and the door objects are seperated by the byte sequence $FFF0. Apparently
+	the offsets in this set are just there for convenience?
+	
+
+
+

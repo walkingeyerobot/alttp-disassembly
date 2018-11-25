@@ -1,0 +1,68 @@
+Guide to the code of Zelda 3 (A Link to the Past) Special Effects Mechanics
+
+
+
+
+Special Effect 0x07 - Bombs
+
+$0280[0x0A] - ??? timer?
+$028A[0x0A] - ???
+$0294[0x0A] - gravity indicator
+$029E[0x0A] - the bomb's elevation from the ground in pixels
+$02A8[0x0A] - fraction part of the bomb's elevation
+
+$0380[0x04?] - carrying status (probably also includes cane of somaria blocks)
+	
+	 0 means not being carried. 1 to 3 are various stages of the bomb being picked up by Link
+	 3 means it is in Link's hands ready to be thrown
+
+$0385,X - nonzero if the bomb is flying through the air (in motion)
+$039F,X - countdown timer
+
+	This timer starts at 0xA0 and counts down to 0. At a certain point it causes the bomb to flash
+	When it reaches 0 it initiates the explosion sequence
+
+$03B1[0x0A?] - when Link is picking up a bomb, this is a delay timer for the animation frames
+
+$03C0[0x02] used to indicate that this slot is filled with a bomb (or rock fall)
+$03C2[0x08] - ???
+$03CA[0x0A] - like $0C7C, this is a floor selector for the bomb, but mirrors the less used $0476
+$03D5[0x0A] - transition flag indicating that the bomb needs to switch floors
+$03E1[0x02?] - ???
+$03E4[0x02] - tile type the bomb interacts with  
+$03EA[0x0A] - gah
+$03F4[0x0A] ???
+$03FD - the only thing that seems to set this is the bird (and only indoors oddly enough)
+
+$0BFA[0x0A] - Y coordinate low byte
+$0C04[0x0A] - X coordinate low byte
+$0C0E[0x0A] - Y coordinate high byte
+$0C18[0x0A] - X coordinate high byte
+$0C22[0x0A] - Y velocity
+$0C2C[0x0A] - X velocity
+$0C36[0x0A] - ???
+$0C40[0x0A] - ???
+$0C54[0x0A] not used?
+$0C5E[0x0A] graphical state of the bomb (from 0 to 0x0B each step progresses from normal to fully exploded)
+$0C68[0x0A] - 0 or 2?
+$0C72[0x0A] - 0x10 if bomb has touched the floor this frame
+$0C7C[0x0A] - floor selector
+$0C86[0x0A] - the starting point in the OAM buffer for the sprites of the special effect
+$0C90[0x0A] - number of sprites the special effects needs * 4 (since each OAM entry is 4 bytes)
+
+	alternates between 0x10 and the direction Link was facing when he laid the bomb ($7E0074)
+	Someone please explain why this is needed :(
+
+
+Special Effect 0x22 - ReceiveItem
+
+    Necessary components that could be encoded in the sprite object data:
+    
+        -How the object was received
+        -What to do when the timer is about to expire
+        -What to do when the timer expires (finishing move?)
+        -Whether to do an animation sequence
+        -Text message with perhaps additional logic for individual types of objects
+        -Whether to trigger the boss victory mode (debatable whether this should even part of the object)
+        -Additional customized options (e.g. moon pearl transforming Link instantaneously)
+        -Sound effects to play either when opened or when the object's counter is at the expiration state
